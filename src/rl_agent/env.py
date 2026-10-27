@@ -14,6 +14,9 @@ except ImportError:
         gym = None
         spaces = None
 
+import numpy as np
+
+
 
 
 EnvBase = gym.Env if gym is not None else object
