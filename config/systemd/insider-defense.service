@@ -1,0 +1,25 @@
+[Unit]
+Description=Autonomous Insider Threat Defense Daemon
+After=network.target auditd.service wazuh-agent.service
+Wants=auditd.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/insider_defense
+ExecStart=/opt/insider_defense/venv/bin/python3 -m src.defense.orchestrator --config /opt/insider_defense/config/config.yaml
+Restart=always
+RestartSec=3s
+
+# Resource limits (Non-functional Requirement: CPU <= 5%)
+CPUQuota=5%
+MemoryMax=512M
+LimitNOFILE=65535
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_KILL CAP_SYS_PTRACE
+
+[Install]
+WantedBy=multi-user.target

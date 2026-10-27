@@ -1,0 +1,54 @@
+# Autonomous Cyber Defense Architecture Configuration
+# Project: Insider Threat Autonomous Defense System
+
+system:
+  defense_mode: "autonomous"  # Options: "monitor", "autonomous", "simulation"
+  max_cpu_percent: 5.0        # Non-functional requirement: CPU overhead < 5%
+  loop_interval_ms: 100       # Poll/Inference cycle (<= 500ms SLA)
+  log_level: "INFO"
+
+sensor:
+  socket_path: "/var/run/insider_sensor.sock"
+  raw_buffer_size: 1024
+  min_keystrokes_for_inference: 8
+  session_timeout_seconds: 300
+
+feature_extraction:
+  window_size: 30             # Number of inter-keystroke intervals per vector
+  features:
+    - "inter_key_time"        # Flight time (ms)
+    - "dwell_time"            # Key press duration (ms)
+    - "typing_velocity"       # Keys per second
+    - "pause_frequency"       # Number of pauses > 300ms
+
+model:
+  device: "cuda"              # Will fallback to cpu if cuda unavailable (RTX 2060 / Colab T4)
+  lstm:
+    input_dim: 4
+    hidden_dim: 64
+    num_layers: 2
+    dropout: 0.2
+    checkpoint_path: "checkpoints/lstm_anomaly_model.pt"
+  anomaly_threshold: 0.75     # Risk score between 0.0 and 1.0
+
+reinforcement_learning:
+  model_type: "PPO"           # Stable-Baselines3 PPO
+  checkpoint_path: "checkpoints/sb3_ppo_defense.zip"
+  confidence_threshold: 0.85
+  action_space:
+    0: "ALLOW"                # No action needed
+    1: "AUDIT_INCREASE"       # Increase auditd log frequency
+    2: "RATE_LIMIT"           # Introduce tty delays / throttle commands
+    3: "TERMINATE_SESSION"    # Kill active SSH tty session
+    4: "ISOLATE_IP"           # Block source IP via iptables/ufw/eBPF
+
+firewall:
+  backend: "iptables"         # "iptables" or "ufw"
+  block_duration_minutes: 60
+  jail_chain: "INSIDER_DEFENSE"
+
+wazuh:
+  enabled: true
+  socket_path: "/var/ossec/queue/sockets/queue"
+  log_file: "/var/log/insider_defense/alerts.json"
+  rule_id_base: 100200

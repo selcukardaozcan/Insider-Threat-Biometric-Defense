@@ -1,0 +1,45 @@
+<!--
+  Wazuh Custom Rules & Decoders for Insider Threat Keystroke Biometrics
+  Location: /var/ossec/etc/rules/local_rules.xml
+-->
+<group name="insider_threat,biometrics,autonomous_defense,">
+
+  <!-- Base rule for Insider Defense System logs -->
+  <rule id="100200" level="3">
+    <decoded_as>json</decoded_as>
+    <field name="component">insider_defense</field>
+    <description>Insider Defense: System telemetry or routine event</description>
+  </rule>
+
+  <!-- Anomaly detected by LSTM -->
+  <rule id="100201" level="8">
+    <if_sid>100200</if_sid>
+    <field name="event_type">anomaly_detected</field>
+    <description>Insider Defense: Keystroke biometric anomaly detected for user $(user) from $(src_ip) (Score: $(risk_score))</description>
+    <mitre>
+      <id>T1078</id> <!-- Valid Accounts -->
+    </mitre>
+  </rule>
+
+  <!-- Autonomous Action: SSH Session Terminated -->
+  <rule id="100202" level="12">
+    <if_sid>100201</if_sid>
+    <field name="action_taken">TERMINATE_SESSION</field>
+    <description>Insider Defense: Autonomous SSH session termination executed for suspicious session $(session_id)</description>
+    <mitre>
+      <id>T1078.003</id>
+    </mitre>
+  </rule>
+
+  <!-- Autonomous Action: IP Isolated / Firewall block -->
+  <rule id="100203" level="14">
+    <if_sid>100201</if_sid>
+    <field name="action_taken">ISOLATE_IP</field>
+    <description>Insider Defense: Host isolation / iptables drop applied to $(src_ip) due to verified stolen credential anomaly</description>
+    <mitre>
+      <id>T1078</id>
+      <id>T1021.004</id> <!-- SSH -->
+    </mitre>
+  </rule>
+
+</group>
