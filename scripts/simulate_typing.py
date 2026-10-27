@@ -1,13 +1,13 @@
-"""
-Simulate Keystroke Dynamics & Benchmark Defense Pipeline
-Generates synthetic interactive SSH sessions (Authorized user vs Impostor)
-and feeds them to the Defense Orchestrator to test real-time latency (<500ms)
-and autonomous mitigation decisions.
-"""
+import os
+import sys
+
+# Ensure project root is in python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import time
 import random
 from src.defense.orchestrator import DefenseOrchestrator
+
 
 
 def simulate_session(orchestrator: DefenseOrchestrator, is_attacker: bool = False, total_keys: int = 50):

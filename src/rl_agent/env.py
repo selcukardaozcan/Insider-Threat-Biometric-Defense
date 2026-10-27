@@ -3,12 +3,22 @@ Autonomous Cyber Defense Gymnasium Environment
 Models the decision-making process for an active SSH session under insider threat monitoring.
 """
 
-import gymnasium as gym
-from gymnasium import spaces
-import numpy as np
+try:
+    import gymnasium as gym
+    from gymnasium import spaces
+except ImportError:
+    try:
+        import gym
+        from gym import spaces
+    except ImportError:
+        gym = None
+        spaces = None
 
 
-class DefenseEnv(gym.Env):
+
+EnvBase = gym.Env if gym is not None else object
+
+class DefenseEnv(EnvBase):
     """
     Observation Space:
     - [0]: current_risk_score (0.0 to 1.0)
@@ -29,13 +39,14 @@ class DefenseEnv(gym.Env):
     def __init__(self):
         super(DefenseEnv, self).__init__()
 
-        self.observation_space = spaces.Box(
-            low=np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float32),
-            high=np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float32),
-            dtype=np.float32
-        )
+        if spaces is not None:
+            self.observation_space = spaces.Box(
+                low=np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+                high=np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float32),
+                dtype=np.float32
+            )
+            self.action_space = spaces.Discrete(5)
 
-        self.action_space = spaces.Discrete(5)
 
         self.current_step = 0
         self.max_steps = 100

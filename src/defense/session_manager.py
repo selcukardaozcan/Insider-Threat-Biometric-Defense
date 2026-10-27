@@ -8,11 +8,15 @@ import shutil
 import os
 
 
+from typing import Optional
+
+
 class SessionManager:
     def __init__(self):
         self.is_linux = shutil.which("pkill") is not None or shutil.which("loginctl") is not None
 
-    def terminate_session(self, session_id: str, username: Optional_str = None) -> bool:
+    def terminate_session(self, session_id: str, username: Optional[str] = None) -> bool:
+
         """
         Kills active SSH session by session ID or username.
         Execution latency target: < 20ms.
