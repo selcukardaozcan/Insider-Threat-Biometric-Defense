@@ -5,7 +5,9 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![Stable-Baselines3](https://img.shields.io/badge/RL-Stable--Baselines3-green.svg)](https://github.com/DLR-RM/stable-baselines3)
 [![Wazuh SIEM](https://img.shields.io/badge/SIEM-Wazuh%20Ready-00a4e4.svg)](https://wazuh.com/)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/selcukardaozcan/Insider_Deneme/blob/main/notebooks/insider_defense_colab_training.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 
 ---
 

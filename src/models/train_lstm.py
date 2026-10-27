@@ -49,15 +49,28 @@ def generate_synthetic_keystroke_dataset(num_samples: int = 2000, seq_len: int =
     return torch.tensor(X), torch.tensor(y)
 
 
-def train(epochs: int = 15, batch_size: int = 32, lr: float = 0.001, save_path: str = "checkpoints/lstm_anomaly_model.pt"):
+def train(epochs: int = 15, batch_size: int = 32, lr: float = 0.001,
+          dataset_type: str = "synthetic", save_path: str = "checkpoints/lstm_anomaly_model.pt"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[*] Training Keystroke LSTM Model on Device: {device} ({torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'})")
 
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    X, y = generate_synthetic_keystroke_dataset()
+    if dataset_type == "cmu":
+        from src.feature_extraction.dataset_loader import load_cmu_dataset
+        data = load_cmu_dataset()
+        if data is not None:
+            X, y = data
+            print(f"[+] Loaded CMU Keystroke Dynamics Dataset: {len(X)} samples.")
+        else:
+            print("[!] CMU Dataset could not be loaded, falling back to synthetic generator.")
+            X, y = generate_synthetic_keystroke_dataset()
+    else:
+        X, y = generate_synthetic_keystroke_dataset()
+
     dataset = TensorDataset(X, y)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
 
     model = KeystrokeLSTMDetector().to(device)
     criterion = nn.BCELoss()
@@ -85,7 +98,11 @@ def train(epochs: int = 15, batch_size: int = 32, lr: float = 0.001, save_path: 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--epochs", type=int, default=15)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--dataset", type=str, default="synthetic", choices=["synthetic", "cmu"])
     parser.add_argument("--save", type=str, default="checkpoints/lstm_anomaly_model.pt")
     args = parser.parse_args()
-    train(epochs=args.epochs, save_path=args.save)
+    train(epochs=args.epochs, batch_size=args.batch_size, lr=args.lr, dataset_type=args.dataset, save_path=args.save)
+
