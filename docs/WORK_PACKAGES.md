@@ -5,7 +5,7 @@
 | İş Paketi | Modül / Bileşen Açıklaması | Adam-Saat | Yüzdelik İş Yükü | Durum |
 | :--- | :--- | :---: | :---: | :---: |
 | **WP1** | Literatür Taraması, Mimari Tasarım ve Proje Planlaması | 20 Saat | %10 | Tamamlandı (Temel Atıldı) |
-| **WP2** | Test Ortamının Kurulumu ve Wazuh/Log Altyapısının Hazırlanması | 30 Saat | %15 | Başlatıldı |
+| **WP2** | Test Ortamının Kurulumu ve Wazuh/Log Altyapısının Hazırlanması | 30 Saat | %15 | Tamamlandı (Ubuntu VM & SSH Port Forwarding Hazır) |
 | **WP3** | Davranışsal Veri Toplama, Özellik Çıkarımı (Feature Extraction) | 40 Saat | %20 | Başlatıldı |
 | **WP4** | PyTorch ile LSTM ve RL Modellerinin Geliştirilmesi ve Eğitimi | 50 Saat | %25 | Başlatıldı |
 | **WP5** | C/Python ile Otonom Müdahale Modülünün Sisteme Entegrasyonu | 30 Saat | %15 | Başlatıldı |
