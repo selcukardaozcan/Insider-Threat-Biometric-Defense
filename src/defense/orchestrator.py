@@ -19,6 +19,7 @@ from src.rl_agent.agent import DefenseAgent
 from src.defense.firewall import FirewallManager
 from src.defense.session_manager import SessionManager
 from src.logging_siem.wazuh_logger import WazuhLogger
+from src.sensor.collector_daemon import CollectorDaemon
 
 
 class DefenseOrchestrator:
@@ -128,7 +129,24 @@ class DefenseOrchestrator:
             "latency_ms": latency_ms
         }
 
+    def start_daemon(self):
+        sock_path = self.config.get("sensor", {}).get("socket_path", "/var/run/insider_sensor.sock")
+        collector = CollectorDaemon(socket_path=sock_path)
+        print(f"[*] Autonomous Defense Daemon running.")
+        print(f"[*] Listening for keystroke sensor telemetry on {sock_path}...")
+        print("[*] Press Ctrl+C to terminate.")
+        try:
+            collector.listen(callback=self.process_keystroke_event)
+        except KeyboardInterrupt:
+            print("\n[*] Stopping defense daemon.")
+            collector.close()
+
 
 if __name__ == "__main__":
-    orchestrator = DefenseOrchestrator()
-    print("[*] Autonomous Defense Orchestrator initialized successfully.")
+    import argparse
+    parser = argparse.ArgumentParser(description="Autonomous Cyber Defense Orchestrator Daemon")
+    parser.add_argument("--config", default="config/config.yaml", help="Path to configuration YAML")
+    args = parser.parse_args()
+
+    orchestrator = DefenseOrchestrator(config_path=args.config)
+    orchestrator.start_daemon()
