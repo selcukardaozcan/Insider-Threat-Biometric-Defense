@@ -36,12 +36,17 @@ class SessionBuffer:
             return None
 
         flight_arr = np.array(self.flight_times, dtype=np.float32)
-        dwell_arr = np.array(self.dwell_times, dtype=np.float32)
+        # Dynamic dwell estimation if default: hesitant/irregular flight correlates with longer dwell
+        dwell_arr = np.array([
+            min(250.0, 75.0 + (f / 30.0)) if d == 75.0 and f > 500.0 else
+            (max(35.0, 40.0 + f) if d == 75.0 and f < 50.0 else d)
+            for f, d in zip(self.flight_times, self.dwell_times)
+        ], dtype=np.float32)
 
         # Typing velocity calculation (window duration in seconds)
         if len(self.timestamps) > 1 and (self.timestamps[-1] - self.timestamps[0]) > 0:
             total_duration_sec = (self.timestamps[-1] - self.timestamps[0]) / 1000.0
-            velocity = len(self.timestamps) / total_duration_sec
+            velocity = len(self.timestamps) / max(total_duration_sec, 0.1)
         else:
             velocity = 4.5  # Typical human baseline
 
@@ -54,6 +59,13 @@ class SessionBuffer:
         norm_velocity = np.full_like(norm_flight, np.clip(velocity / 10.0, 0.0, 2.0))
 
         features = np.stack([norm_flight, norm_dwell, norm_velocity, pause_flags], axis=-1)
+
+        # Pad to full window_size (30) so LSTM receives expected temporal sequence length
+        if len(features) < self.window_size:
+            pad_len = self.window_size - len(features)
+            pad = np.tile(features[-1:], (pad_len, 1))
+            features = np.vstack([features, pad])
+
         return features
 
 

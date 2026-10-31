@@ -110,7 +110,7 @@ class DefenseOrchestrator:
         self.session_ema_risk[session_id] = ema_risk
 
         streak = self.session_consec_anomalies.get(session_id, 0)
-        streak = (streak + 1) if risk_score > 0.70 else max(0, streak - 1)
+        streak = (streak + 1) if (risk_score >= 0.48 or ema_risk >= 0.48) else max(0, streak - 1)
         self.session_consec_anomalies[session_id] = streak
 
         # 3. RL Agent Decision (Latency ~ 1ms)

@@ -35,21 +35,23 @@ class DefenseAgent:
         observation: [current_risk, ema_risk, consecutive_anomalies, progress]
         Returns: (action_id, action_name)
         """
+        risk = float(observation[0])
+        ema_risk = float(observation[1])
+        consec = float(observation[2])
+
         if self.model is not None:
             action, _ = self.model.predict(observation, deterministic=True)
             action_id = int(action)
         else:
-            # High-assurance safety heuristic policy
-            risk = observation[0]
-            consec = observation[2]
+            action_id = 0
 
-            if risk > 0.88 and consec >= 0.6:
-                action_id = 4  # ISOLATE_IP
-            elif risk > 0.75:
-                action_id = 3  # TERMINATE_SESSION
-            elif risk > 0.50:
-                action_id = 1  # AUDIT_INCREASE
-            else:
-                action_id = 0  # ALLOW
+        # High-assurance safety supervisory policy:
+        # Progressively escalate defense: AUDIT_INCREASE -> RATE_LIMIT -> TERMINATE_SESSION -> ISOLATE_IP
+        if (risk >= 0.75 or ema_risk >= 0.70) and consec >= 0.6:
+            action_id = max(action_id, 4)  # ISOLATE_IP
+        elif risk >= 0.60 or ema_risk >= 0.55 or consec >= 0.4:
+            action_id = max(action_id, 3)  # TERMINATE_SESSION
+        elif risk >= 0.48 or ema_risk >= 0.45:
+            action_id = max(action_id, 1)  # AUDIT_INCREASE
 
         return action_id, ACTION_NAMES.get(action_id, "ALLOW")
