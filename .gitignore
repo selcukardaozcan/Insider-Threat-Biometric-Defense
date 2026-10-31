@@ -20,12 +20,7 @@ build/
 bin/
 
 # Machine Learning & Checkpoints
-*.pt
-*.pth
-*.onnx
-*.zip
 logs/
-checkpoints/
 runs/
 data/raw/
 data/processed/
