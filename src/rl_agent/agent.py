@@ -27,6 +27,8 @@ class DefenseAgent:
                 print(f"[+] Loaded SB3 RL Agent policy from {checkpoint_path}")
             except Exception as e:
                 print(f"[!] Warning: Could not load SB3 model ({e}), falling back to heuristic policy.")
+        else:
+            print(f"[!] Info: RL checkpoint not found at {checkpoint_path}, using heuristic safety policy.")
 
     def decide_action(self, observation: np.ndarray) -> (int, str):
         """

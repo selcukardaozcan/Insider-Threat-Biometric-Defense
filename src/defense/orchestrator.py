@@ -34,8 +34,12 @@ class DefenseOrchestrator:
         self.device = "cuda" if (self.config.get("model", {}).get("device") == "cuda" and False) else "cpu"
 
         # Initialize PyTorch LSTM Anomaly Detector
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
         self.lstm = KeystrokeLSTMDetector()
         lstm_ckpt = self.config.get("model", {}).get("lstm", {}).get("checkpoint_path")
+        if lstm_ckpt and not os.path.isabs(lstm_ckpt):
+            lstm_ckpt = os.path.join(base_dir, lstm_ckpt)
+
         if lstm_ckpt and os.path.exists(lstm_ckpt):
             try:
                 import torch
@@ -43,9 +47,13 @@ class DefenseOrchestrator:
                 print(f"[+] Loaded LSTM weights from {lstm_ckpt}")
             except Exception as e:
                 print(f"[!] Warning: Could not load LSTM checkpoint: {e}")
+        else:
+            print(f"[!] Warning: LSTM checkpoint not found at {lstm_ckpt}")
 
         # Initialize RL Agent
         rl_ckpt = self.config.get("reinforcement_learning", {}).get("checkpoint_path")
+        if rl_ckpt and not os.path.isabs(rl_ckpt):
+            rl_ckpt = os.path.join(base_dir, rl_ckpt)
         self.agent = DefenseAgent(checkpoint_path=rl_ckpt)
 
         # Defense Actuators
