@@ -21,18 +21,18 @@ class SessionBuffer:
         self.dwell_times.append(dwell_time_ms)
         self.timestamps.append(timestamp_ms)
 
-    def is_ready(self) -> bool:
-        return len(self.flight_times) >= self.window_size
+    def is_ready(self, min_keys: int = 8) -> bool:
+        return len(self.flight_times) >= min_keys
 
-    def extract_features(self) -> Optional[np.ndarray]:
+    def extract_features(self, min_keys: int = 8) -> Optional[np.ndarray]:
         """
-        Extracts temporal feature matrix (window_size, 4):
+        Extracts temporal feature matrix (sequence_length, 4):
         - flight_time (normalized)
         - dwell_time (normalized)
         - typing_velocity (keys per second)
         - pause_indicator (1.0 if flight_time > 300ms else 0.0)
         """
-        if not self.is_ready():
+        if not self.is_ready(min_keys=min_keys):
             return None
 
         flight_arr = np.array(self.flight_times, dtype=np.float32)
@@ -58,8 +58,9 @@ class SessionBuffer:
 
 
 class FeatureExtractor:
-    def __init__(self, window_size: int = 30):
+    def __init__(self, window_size: int = 30, min_keys: int = 8):
         self.window_size = window_size
+        self.min_keys = min_keys
         self.sessions: Dict[str, SessionBuffer] = {}
 
     def process_event(self, event: dict) -> Optional[np.ndarray]:
@@ -73,7 +74,7 @@ class FeatureExtractor:
         timestamp = float(event.get("timestamp_ms", 0.0))
 
         buffer.append(flight_time, dwell_time, timestamp)
-        return buffer.extract_features()
+        return buffer.extract_features(min_keys=self.min_keys)
 
     def clear_session(self, session_id: str):
         if session_id in self.sessions:

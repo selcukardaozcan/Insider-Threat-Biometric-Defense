@@ -26,7 +26,11 @@ class DefenseOrchestrator:
     def __init__(self, config_path: str = "config/config.yaml"):
         self.config = self._load_config(config_path)
 
-        self.extractor = FeatureExtractor(window_size=self.config.get("feature_extraction", {}).get("window_size", 30))
+        min_keys = self.config.get("sensor", {}).get("min_keystrokes_for_inference", 8)
+        self.extractor = FeatureExtractor(
+            window_size=self.config.get("feature_extraction", {}).get("window_size", 30),
+            min_keys=min_keys
+        )
         self.device = "cuda" if (self.config.get("model", {}).get("device") == "cuda" and False) else "cpu"
 
         # Initialize PyTorch LSTM Anomaly Detector
@@ -81,8 +85,12 @@ class DefenseOrchestrator:
 
         # 1. Feature Extraction
         feature_matrix = self.extractor.process_event(event)
+        buf = self.extractor.sessions.get(session_id)
+        count = len(buf.flight_times) if buf else 0
+
         if feature_matrix is None:
             # Buffer not full yet, keep collecting
+            print(f"[*] Keystroke received ({count}/{self.extractor.min_keys} min) for {user} (flight: {event.get('flight_time_ms', 0):.1f}ms)...")
             return {"status": "buffering", "session_id": session_id}
 
         # 2. PyTorch LSTM Anomaly Detection (Latency ~ 2-5ms)
@@ -101,14 +109,17 @@ class DefenseOrchestrator:
         observation = np.array([risk_score, ema_risk, min(streak / 5.0, 1.0), 0.5], dtype=np.float32)
         action_id, action_name = self.agent.decide_action(observation)
 
+        latency_ms = (time.perf_counter() - start_time) * 1000.0
+
+        # Print live status to console
+        print(f"[!] [ANALYSIS #{count}] user={user} | Risk: {risk_score:.3f} | EMA: {ema_risk:.3f} | Action: {action_name} | Latency: {latency_ms:.2f}ms")
+
         # 4. Autonomous Enforcement
         if action_name == "TERMINATE_SESSION":
             self.session_mgr.terminate_session(session_id, username=user)
         elif action_name == "ISOLATE_IP":
             self.session_mgr.terminate_session(session_id, username=user)
             self.firewall.block_ip(src_ip)
-
-        latency_ms = (time.perf_counter() - start_time) * 1000.0
 
         # 5. Wazuh SIEM Security Event
         self.logger.log_event(

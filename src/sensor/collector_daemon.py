@@ -26,6 +26,10 @@ class CollectorDaemon:
                 os.remove(self.socket_path)
             self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
             self.sock.bind(self.socket_path)
+            try:
+                os.chmod(self.socket_path, 0o666)
+            except Exception as e:
+                print(f"[!] Could not set socket permissions: {e}")
             self.sock.setblocking(False)
         else:
             # Fallback for platforms without AF_UNIX

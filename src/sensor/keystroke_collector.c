@@ -37,9 +37,29 @@ static long long get_current_time_ms(void) {
     return (long long)(ts.tv_sec) * 1000 + (ts.tv_nsec / 1000000);
 }
 
+#include <signal.h>
+
+static struct termios orig_termios;
+static int termios_modified = 0;
+
+void reset_terminal_mode(void) {
+    if (termios_modified) {
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+        termios_modified = 0;
+    }
+}
+
+void sig_handler(int sig) {
+    (void)sig;
+    reset_terminal_mode();
+    printf("\n[*] Exiting Keystroke Collector.\n");
+    exit(0);
+}
+
 int send_event_to_daemon(const KeystrokeEvent *event, const char *sock_path) {
     int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (sock < 0) {
+        perror("[-] Failed to create AF_UNIX socket");
         return -1;
     }
 
@@ -58,11 +78,17 @@ int send_event_to_daemon(const KeystrokeEvent *event, const char *sock_path) {
     ssize_t sent = sendto(sock, payload, strlen(payload), 0,
                           (struct sockaddr*)&addr, sizeof(struct sockaddr_un));
 
+    if (sent < 0) {
+        perror("[-] Failed to send event to daemon socket");
+    }
+
     close(sock);
     return (sent > 0) ? 0 : -1;
 }
 
 int main(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
     printf("[*] Insider Threat Keystroke Collector initialized.\n");
 
     const char *user = getenv("USER");
@@ -80,9 +106,22 @@ int main(int argc, char *argv[]) {
     long long last_press_ms = 0;
 
     printf("[+] Monitoring keystrokes for user: %s (IP: %s, Session: %s)\n", user, src_ip, session_id);
-    printf("[+] Press Ctrl+C or type 'exit' to quit.\n");
+    printf("[+] Interactive mode active. Start typing (Press Ctrl+C to quit):\n\n");
 
-    // Test loop or piped input hook
+    // Configure cbreak mode: read characters immediately without waiting for newline
+    if (tcgetattr(STDIN_FILENO, &orig_termios) == 0) {
+        struct termios raw = orig_termios;
+        raw.c_lflag &= ~(ICANON); // Non-canonical mode (no line buffering)
+        raw.c_cc[VMIN] = 1;
+        raw.c_cc[VTIME] = 0;
+        if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == 0) {
+            termios_modified = 1;
+            atexit(reset_terminal_mode);
+            signal(SIGINT, sig_handler);
+            signal(SIGTERM, sig_handler);
+        }
+    }
+
     int ch;
     while ((ch = getchar()) != EOF) {
         long long now_ms = get_current_time_ms();
@@ -97,9 +136,18 @@ int main(int argc, char *argv[]) {
         event.flight_time_ms = flight_time;
         event.key_code = ch;
 
-        // Dispatch via UDP unix domain socket or output
+        // Visual feedback for user
+        if (ch == 10 || ch == 13) {
+            printf("\n[Sensor] <ENTER> (flight: %lld ms) -> telemetry sent\n", flight_time);
+        } else {
+            printf("[Sensor] '%c' (flight: %lld ms) -> telemetry sent\n", (ch >= 32 && ch <= 126) ? ch : '?', flight_time);
+        }
+        fflush(stdout);
+
+        // Dispatch via UDP unix domain socket
         send_event_to_daemon(&event, SOCKET_PATH);
     }
 
+    reset_terminal_mode();
     return 0;
 }
