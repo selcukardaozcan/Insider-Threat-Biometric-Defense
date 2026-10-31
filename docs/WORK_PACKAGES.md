@@ -4,13 +4,13 @@
 
 | İş Paketi | Modül / Bileşen Açıklaması | Adam-Saat | Yüzdelik İş Yükü | Durum |
 | :--- | :--- | :---: | :---: | :---: |
-| **WP1** | Literatür Taraması, Mimari Tasarım ve Proje Planlaması | 20 Saat | %10 | Tamamlandı (Temel Atıldı) |
-| **WP2** | Test Ortamının Kurulumu ve Wazuh/Log Altyapısının Hazırlanması | 30 Saat | %15 | Tamamlandı (Ubuntu VM & SSH Port Forwarding Hazır) |
-| **WP3** | Davranışsal Veri Toplama, Özellik Çıkarımı (Feature Extraction) | 40 Saat | %20 | Tamamlandı (C Hook, UDS IPC & Temporal Extractor) |
-| **WP4** | PyTorch ile LSTM ve RL Modellerinin Geliştirilmesi ve Eğitimi | 50 Saat | %25 | Tamamlandı (LSTM & SB3 PPO Entegrasyonu) |
-| **WP5** | C/Python ile Otonom Müdahale Modülünün Sisteme Entegrasyonu | 30 Saat | %15 | Tamamlandı (Canlı Test: SIGKILL & Wazuh Alarm Başarılı) |
-| **WP6** | Performans Testleri, Optimizasyon ve Bitirme Tezi Raporlama | 30 Saat | %15 | Planlandı |
-| **TOPLAM** | | **200 Saat** | **%100** | |
+| **WP1** | Literatür Taraması, Mimari Tasarım ve Proje Planlaması | 20 Saat | %10 | Tamamlandı |
+| **WP2** | Test Ortamının Kurulumu ve Wazuh/Log Altyapısının Hazırlanması | 30 Saat | %15 | Devam Ediyor (VM & SSH Hazır, Wazuh Agent/Dashboard Yapılacak) |
+| **WP3** | Davranışsal Veri Toplama, Özellik Çıkarımı (Feature Extraction) | 40 Saat | %20 | Devam Ediyor (C Hook & IPC PoC Hazır, Otomatik SSH Kancası Yapılacak) |
+| **WP4** | PyTorch ile LSTM ve RL Modellerinin Geliştirilmesi ve Eğitimi | 50 Saat | %25 | Devam Ediyor (İskelet Hazır, CMU Gerçek Veri Seti Eğitimi Yapılacak) |
+| **WP5** | C/Python ile Otonom Müdahale Modülünün Sisteme Entegrasyonu | 30 Saat | %15 | Devam Ediyor (SIGKILL Test Edildi, iptables/eBPF Derinleştirilecek) |
+| **WP6** | Performans Testleri, Optimizasyon ve Bitirme Tezi Raporlama | 30 Saat | %15 | Planlandı (ROC/AUC, FPR Analizi ve Raporlama) |
+| **TOPLAM** | | **200 Saat** | **%100** | **PoC İskeleti Doğrulandı (~%30)** |
 
 ---
 
