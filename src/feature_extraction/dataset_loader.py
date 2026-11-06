@@ -12,7 +12,7 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 
-CMU_DATASET_URL = "https://raw.githubusercontent.com/jxzhang/keystroke-dynamics/master/DSL-StrongPasswordData.csv"
+CMU_DATASET_URL = "https://www.cs.cmu.edu/~keystroke/DSL-StrongPasswordData.csv"
 DATA_DIR = "data"
 
 
