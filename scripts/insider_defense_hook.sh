@@ -16,8 +16,9 @@ if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
         # Ensure hook runs only once per SSH session
         if [ -z "$INSIDER_SENSOR_ACTIVE" ]; then
             export INSIDER_SENSOR_ACTIVE=1
-            # Execute bash wrapped under keystroke sensor
-            exec "$SENSOR_BIN" --shell /bin/bash
+            # Execute sensor in silent mode
+            exec "$SENSOR_BIN" --silent
         fi
     fi
 fi
+
