@@ -47,11 +47,15 @@ class DefenseAgent:
 
         # High-assurance safety supervisory policy:
         # Progressively escalate defense: AUDIT_INCREASE -> RATE_LIMIT -> TERMINATE_SESSION -> ISOLATE_IP
-        if (risk >= 0.75 or ema_risk >= 0.70) and consec >= 0.6:
+        # An isolated thinking pause must NOT terminate session immediately!
+        # Requires persistent anomaly streak (streak >= 3 -> consec >= 0.6)
+        if (risk >= 0.88 or ema_risk >= 0.82) and consec >= 0.8:
             action_id = max(action_id, 4)  # ISOLATE_IP
-        elif risk >= 0.60 or ema_risk >= 0.55 or consec >= 0.4:
-            action_id = max(action_id, 3)  # TERMINATE_SESSION
-        elif risk >= 0.48 or ema_risk >= 0.45:
-            action_id = max(action_id, 1)  # AUDIT_INCREASE
+        elif (risk >= 0.80 or ema_risk >= 0.75) and consec >= 0.6:
+            action_id = max(action_id, 3)  # TERMINATE_SESSION (Requires at least 3 consecutive anomalous keys)
+        elif risk >= 0.60 or ema_risk >= 0.55:
+            action_id = max(action_id, 1)  # AUDIT_INCREASE (Yellow warning & extra auditing, does NOT kill session)
+        else:
+            action_id = 0  # ALLOW
 
         return action_id, ACTION_NAMES.get(action_id, "ALLOW")

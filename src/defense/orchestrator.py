@@ -106,11 +106,12 @@ class DefenseOrchestrator:
 
         # Update EMA risk and anomaly streak
         prev_ema = self.session_ema_risk.get(session_id, risk_score)
-        ema_risk = 0.7 * prev_ema + 0.3 * risk_score
+        ema_risk = 0.8 * prev_ema + 0.2 * risk_score  # Smoother EMA filter against short bursts
         self.session_ema_risk[session_id] = ema_risk
 
+        # Anomaly streak requires consistent high risk, not just a single slow key
         streak = self.session_consec_anomalies.get(session_id, 0)
-        streak = (streak + 1) if (risk_score >= 0.48 or ema_risk >= 0.48) else max(0, streak - 1)
+        streak = (streak + 1) if risk_score >= 0.75 else max(0, streak - 1)
         self.session_consec_anomalies[session_id] = streak
 
         # 3. RL Agent Decision (Latency ~ 1ms)

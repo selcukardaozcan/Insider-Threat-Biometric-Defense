@@ -36,11 +36,16 @@ class SessionBuffer:
             return None
 
         flight_arr = np.array(self.flight_times, dtype=np.float32)
+        # Cap single thinking pauses:
+        # If flight_time > 2000ms (2 seconds), it's a natural thinking/reading pause,
+        # not necessarily an anomalous typing jitter. Cap it at 1200ms for feature normalization.
+        clean_flight_arr = np.where(flight_arr > 2000.0, 1200.0, flight_arr)
+
         # Dynamic dwell estimation if default: hesitant/irregular flight correlates with longer dwell
         dwell_arr = np.array([
             min(250.0, 75.0 + (f / 30.0)) if d == 75.0 and f > 500.0 else
             (max(35.0, 40.0 + f) if d == 75.0 and f < 50.0 else d)
-            for f, d in zip(self.flight_times, self.dwell_times)
+            for f, d in zip(clean_flight_arr, self.dwell_times)
         ], dtype=np.float32)
 
         # Typing velocity calculation (window duration in seconds)
@@ -50,11 +55,11 @@ class SessionBuffer:
         else:
             velocity = 4.5  # Typical human baseline
 
-        # Pauses > 300ms
-        pause_flags = (flight_arr > 300.0).astype(np.float32)
+        # Pauses > 300ms but exclude single long idle pauses
+        pause_flags = ((flight_arr > 300.0) & (flight_arr < 5000.0)).astype(np.float32)
 
         # Normalization (cap values to prevent outliers)
-        norm_flight = np.clip(flight_arr / 500.0, 0.0, 5.0)
+        norm_flight = np.clip(clean_flight_arr / 500.0, 0.0, 5.0)
         norm_dwell = np.clip(dwell_arr / 200.0, 0.0, 5.0)
         norm_velocity = np.full_like(norm_flight, np.clip(velocity / 10.0, 0.0, 2.0))
 
