@@ -39,3 +39,7 @@ Thumbs.db
 .env
 *.local
 credentials.json
+
+# Private Academic Reports & Deliverables
+*.pdf
+docs/*.pdf
