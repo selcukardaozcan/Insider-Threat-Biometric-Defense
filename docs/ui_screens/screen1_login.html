@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Screen 1 - SOC Analyst Secure Authentication</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0B0F19; color: #E2E8F0; width: 1400px; height: 800px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .bg-grid { position: absolute; inset: 0; background-image: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 60%), linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 100% 100%, 40px 40px, 40px 40px; }
+    .card { position: relative; width: 520px; background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(14, 165, 233, 0.15); }
+    .logo-badge { display: inline-flex; align-items: center; gap: 10px; background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.3); color: #38BDF8; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+    h1 { font-size: 24px; font-weight: 700; color: #F8FAFC; margin-bottom: 8px; }
+    p.subtitle { font-size: 14px; color: #94A3B8; margin-bottom: 28px; line-height: 1.5; }
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #CBD5E1; margin-bottom: 8px; }
+    input, select { width: 100%; background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 12px 14px; font-size: 14px; color: #F8FAFC; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus { border-color: #38BDF8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .role-btn { background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-size: 13px; color: #94A3B8; font-weight: 600; }
+    .role-btn.active { background: rgba(14, 165, 233, 0.15); border-color: #38BDF8; color: #38BDF8; }
+    .mfa-box { background: rgba(15, 23, 42, 0.6); border: 1px dashed #334155; border-radius: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; font-size: 13px; color: #94A3B8; }
+    .btn-submit { width: 100%; background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%); color: white; border: none; border-radius: 8px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4); }
+    .footer-note { text-align: center; margin-top: 20px; font-size: 12px; color: #64748B; }
+    .badge-status { display: inline-flex; width: 8px; height: 8px; background: #10B981; border-radius: 50%; box-shadow: 0 0 8px #10B981; margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="card">
+    <div class="logo-badge">
+      <span class="badge-status"></span> SENTINEL-AI SOC PORTAL v2.4
+    </div>
+    <h1>Güvenli Analist Girişi</h1>
+    <p class="subtitle">Sunucu Güvenliğinde İç Tehditlerin Biyometrik Analiz ile Tespiti ve Otonom Müdahale Sistemi Yönetim Konsolu</p>
+    
+    <label>Erişim Rolü</label>
+    <div class="role-grid">
+      <div class="role-btn active">🛡️ SOC Analisti</div>
+      <div class="role-btn">⚡ Güvenlik Mühendisi</div>
+    </div>
+
+    <div class="field">
+      <label>Kurumsal Kimlik (E-Posta / Kullanıcı Adı)</label>
+      <input type="text" value="selcuk.ozcan@soc.internal" readonly>
+    </div>
+
+    <div class="field">
+      <label>Güvenli Parola</label>
+      <input type="password" value="••••••••••••••••" readonly>
+    </div>
+
+    <div class="mfa-box">
+      <span>🔐 FIDO2 / YubiKey Donanım Anahtarı</span>
+      <span style="color: #10B981; font-weight: 600;">Algılandı ✓</span>
+    </div>
+
+    <button class="btn-submit">Güvenli Oturumu Başlat (Console Girişi)</button>
+    <div class="footer-note">256-bit TLS Şifreleme • ISO 27001 & NIST 800-53 Uyumlu Denetim</div>
+  </div>
+</body>
+</html>

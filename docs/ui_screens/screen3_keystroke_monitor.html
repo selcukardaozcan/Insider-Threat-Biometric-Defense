@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Screen 3 - Real-Time Keystroke Biometrics & Session Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0B0F19; color: #E2E8F0; width: 1400px; height: 800px; padding: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
+    .header { display: flex; align-items: center; justify-content: space-between; background: #111827; border: 1px solid #1F2937; padding: 12px 20px; border-radius: 12px; }
+    .header-title h2 { font-size: 15px; font-weight: 700; color: #F8FAFC; }
+    .header-title span { font-size: 12px; color: #94A3B8; }
+    
+    .session-meta-bar { display: flex; align-items: center; justify-content: space-between; background: #1E293B; border: 1px solid #334155; padding: 10px 18px; border-radius: 8px; font-size: 13px; }
+    .meta-item { display: flex; align-items: center; gap: 8px; }
+    .meta-label { color: #94A3B8; font-weight: 600; font-size: 11px; text-transform: uppercase; }
+    .meta-val { color: #F8FAFC; font-weight: 700; font-family: monospace; }
+    
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; min-height: 0; }
+    .panel { background: #111827; border: 1px solid #1F2937; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+    .panel-title { font-size: 13px; font-weight: 700; color: #F8FAFC; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    
+    /* Risk Gauge */
+    .gauge-wrapper { display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 16px 0; background: #0F172A; border-radius: 8px; margin-bottom: 14px; }
+    .gauge-num { font-size: 48px; font-weight: 800; color: #EF4444; text-shadow: 0 0 20px rgba(239, 68, 68, 0.4); line-height: 1; }
+    .gauge-sub { font-size: 12px; font-weight: 600; color: #EF4444; margin-top: 6px; letter-spacing: 0.5px; }
+
+    /* Waveform chart SVG */
+    .waveform-card { background: #0F172A; border-radius: 8px; padding: 12px; flex: 1; display: flex; flex-direction: column; }
+    .wave-header { font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 8px; display: flex; justify-content: space-between; }
+
+    /* Telemetry table */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { color: #64748B; font-weight: 600; padding: 8px 6px; border-bottom: 1px solid #1F2937; text-transform: uppercase; font-size: 10px; }
+    td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #CBD5E1; font-family: monospace; font-size: 11px; }
+    .tag { padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; }
+    .tag.red { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+    .tag.green { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+    .tag.amber { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <h2>Canlı SSH Oturumu ve Biyometrik Tuş Dinamiği İzleme Ekranı</h2>
+      <span>C Sensörü • POSIX Timer • PyTorch LSTM Giriş Vektörü Analizi</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <span style="background: rgba(239, 68, 68, 0.15); border: 1px solid #EF4444; color: #EF4444; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;">DURUM: TEHDİT MÜDAHALESİ GERÇEKLEŞTİ</span>
+    </div>
+  </div>
+
+  <!-- Session Metadata -->
+  <div class="session-meta-bar">
+    <div class="meta-item"><span class="meta-label">Oturum:</span> <span class="meta-val">sess_ardaozcan_4660</span></div>
+    <div class="meta-item"><span class="meta-label">Kullanıcı:</span> <span class="meta-val">ardaozcan (tty pts/1)</span></div>
+    <div class="meta-item"><span class="meta-label">Kaynak:</span> <span class="meta-val">10.0.2.2:51240 (SSH-2.0-OpenSSH_9.6p1)</span></div>
+    <div class="meta-item"><span class="meta-label">Örneklem Penceresi:</span> <span class="meta-val">8/30 Tuş (Erken Tetikleme)</span></div>
+    <div class="meta-item"><span class="meta-label">Eğitim Veri Seti:</span> <span class="meta-val" style="color: #38BDF8;">CMU Benchmark (51 Kullanıcı)</span></div>
+  </div>
+
+  <div class="grid-2col">
+    <!-- Left Column: LSTM & Flight Time -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>🤖 PyTorch LSTM Derin Öğrenme Risk Skoru</span>
+        <span style="font-size: 11px; color: #94A3B8;">Model: 2-Layer LSTM + Sigmoid Head</span>
+      </div>
+
+      <div class="gauge-wrapper">
+        <div class="gauge-num">0.980</div>
+        <div class="gauge-sub">YÜKSEK RİSK: İÇ TEHDİT / ÇALINMIŞ KİMLİK DOĞRULANDI</div>
+        <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">EMA Filtrelenmiş Risk: 0.980 • Anomali Serisi: 3/3 (Eşik Aşıldı)</div>
+      </div>
+
+      <!-- Waveform SVG -->
+      <div class="waveform-card">
+        <div class="wave-header">
+          <span>TUŞ UÇUŞ SÜRESİ (FLIGHT TIME) VE BEKLEME DALGASI (ms)</span>
+          <span style="color: #EF4444;">Kırmızı Zirve: 9,564 ms (Düşünme/Tereddüt Molası)</span>
+        </div>
+        <svg viewBox="0 0 500 120" style="width: 100%; height: 100px;">
+          <!-- Grid lines -->
+          <line x1="0" y1="20" x2="500" y2="20" stroke="#1E293B" stroke-dasharray="3"/>
+          <line x1="0" y1="60" x2="500" y2="60" stroke="#1E293B" stroke-dasharray="3"/>
+          <line x1="0" y1="100" x2="500" y2="100" stroke="#1E293B" stroke-dasharray="3"/>
+          <!-- Legitimate Normal baseline (green) -->
+          <path d="M 0 105 Q 50 100, 100 102 T 200 98 T 300 104 T 400 100 T 500 102" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="4"/>
+          <!-- Attacker Anomaly Spike (red) -->
+          <path d="M 0 105 L 50 100 L 90 95 L 140 10 L 190 98 L 240 70 L 290 85 L 340 88 L 400 90 L 500 90" fill="none" stroke="#EF4444" stroke-width="3"/>
+          <circle cx="140" cy="10" r="5" fill="#EF4444" />
+          <text x="150" y="18" fill="#EF4444" font-size="10" font-weight="bold">9,564 ms Anomali</text>
+        </svg>
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748B; margin-top: 4px;">
+          <span>Yeşil Çizgi: Meşru Kullanıcı Profili (~120ms)</span>
+          <span>Kırmızı Çizgi: Mevcut Saldırgan Deseni</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Raw Keystroke Telemetry Table -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>⏱️ Yakalanan Ham Tuş Telemetrisi (C Hook Çıktısı)</span>
+        <span style="font-size: 11px; color: #10B981;">IPC Soketi: /var/run/insider_sensor.sock</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Tuş #</th>
+            <th>Karakter</th>
+            <th>Uçuş Süresi (Flight)</th>
+            <th>Basılı Kalma (Dwell)</th>
+            <th>Hız (Velo)</th>
+            <th>Değerlendirme</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#01</td>
+            <td>'l'</td>
+            <td>0.0 ms</td>
+            <td>75.0 ms</td>
+            <td>4.5 key/s</td>
+            <td><span class="tag green">Başlangıç</span></td>
+          </tr>
+          <tr>
+            <td>#02</td>
+            <td>'s'</td>
+            <td>118.0 ms</td>
+            <td>78.0 ms</td>
+            <td>4.8 key/s</td>
+            <td><span class="tag green">Doğal</span></td>
+          </tr>
+          <tr style="background: rgba(239, 68, 68, 0.12);">
+            <td>#03</td>
+            <td>'l'</td>
+            <td><strong>9,564.0 ms</strong></td>
+            <td>185.0 ms</td>
+            <td>0.1 key/s</td>
+            <td><span class="tag red">KRİTİK ANOMALİ</span></td>
+          </tr>
+          <tr>
+            <td>#04</td>
+            <td>'s'</td>
+            <td>161.0 ms</td>
+            <td>82.0 ms</td>
+            <td>2.2 key/s</td>
+            <td><span class="tag amber">Şüpheli Düzensizlik</span></td>
+          </tr>
+          <tr>
+            <td>#05</td>
+            <td>' ' (Boşluk)</td>
+            <td>600.0 ms</td>
+            <td>120.0 ms</td>
+            <td>1.8 key/s</td>
+            <td><span class="tag amber">Yavaşlama</span></td>
+          </tr>
+          <tr>
+            <td>#06</td>
+            <td>'-'</td>
+            <td>206.0 ms</td>
+            <td>85.0 ms</td>
+            <td>3.1 key/s</td>
+            <td><span class="tag amber">Tereddüt</span></td>
+          </tr>
+          <tr>
+            <td>#07</td>
+            <td>'l'</td>
+            <td>343.0 ms</td>
+            <td>94.0 ms</td>
+            <td>2.9 key/s</td>
+            <td><span class="tag amber">Tereddüt</span></td>
+          </tr>
+          <tr style="background: rgba(239, 68, 68, 0.15);">
+            <td>#08</td>
+            <td>'a'</td>
+            <td>241.0 ms</td>
+            <td>90.0 ms</td>
+            <td>2.8 key/s</td>
+            <td><span class="tag red">SIGKILL İCRA EDİLDİ</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: auto; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; font-size: 11px; color: #EF4444;">
+        <strong>RL Ajanı Kararı:</strong> 8. tuş sonrasında PPO Takviyeli Öğrenme Ajanı <code>TERMINATE_SESSION</code> aksiyonunu tetikledi. Hedef PID <code>4660</code> (keystroke_collector) <strong>29.54ms</strong> içerisinde sonlandırıldı.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

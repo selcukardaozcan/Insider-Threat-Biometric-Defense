@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Screen 2 - Executive SOC Threat & Overview Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0B0F19; color: #E2E8F0; width: 1400px; height: 800px; padding: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 20px; }
+    
+    /* Top Header */
+    .header { display: flex; align-items: center; justify-content: space-between; background: #111827; border: 1px solid #1F2937; padding: 14px 24px; border-radius: 12px; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo-badge { background: #0369A1; color: white; font-weight: 700; padding: 6px 12px; border-radius: 6px; font-size: 14px; letter-spacing: 0.5px; }
+    .header-title h2 { font-size: 16px; font-weight: 700; color: #F8FAFC; }
+    .header-title span { font-size: 12px; color: #94A3B8; }
+    .header-right { display: flex; align-items: center; gap: 18px; font-size: 13px; }
+    .stat-pill { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10B981; padding: 6px 12px; border-radius: 999px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .pulse-dot { width: 8px; height: 8px; background: #10B981; border-radius: 50%; box-shadow: 0 0 8px #10B981; }
+
+    /* KPI Row */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .kpi-card { background: #111827; border: 1px solid #1F2937; border-radius: 12px; padding: 18px 20px; }
+    .kpi-label { font-size: 12px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .kpi-val { font-size: 26px; font-weight: 800; color: #F8FAFC; display: flex; align-items: baseline; gap: 8px; }
+    .kpi-sub { font-size: 12px; color: #10B981; font-weight: 600; }
+    .kpi-sub.warn { color: #F59E0B; }
+    .kpi-sub.danger { color: #EF4444; }
+
+    /* Main Grid */
+    .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; flex: 1; min-height: 0; }
+    .panel { background: #111827; border: 1px solid #1F2937; border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; overflow: hidden; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .panel-title { font-size: 14px; font-weight: 700; color: #F8FAFC; display: flex; align-items: center; gap: 8px; }
+    
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    th { color: #64748B; font-weight: 600; padding: 10px 8px; border-bottom: 1px solid #1F2937; text-transform: uppercase; font-size: 11px; }
+    td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #CBD5E1; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+    .badge.allow { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge.audit { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge.kill { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    
+    /* Chart representation */
+    .chart-box { height: 160px; background: #0F172A; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; margin-bottom: 12px; }
+    .bars { display: flex; align-items: flex-end; gap: 14px; height: 110px; padding: 0 10px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .bar { width: 100%; border-radius: 4px 4px 0 0; }
+    .bar-label { font-size: 10px; color: #64748B; }
+
+    /* Feed List */
+    .feed-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-radius: 6px; background: #0F172A; margin-bottom: 8px; font-size: 12px; }
+    .feed-left { display: flex; align-items: center; gap: 10px; }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-badge">SENTINEL-AI</div>
+      <div class="header-title">
+        <h2>SOC Komuta Merkezi & Genel Tehdit İzleme Paneli</h2>
+        <span>Otonom Biyometrik İç Tehdit Savunma Mimarisi</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="stat-pill"><span class="pulse-dot"></span> Savunma Motoru: AKTİF (Daemon v2.4)</div>
+      <div style="color: #94A3B8;">Analist: <strong>Selçuk Arda Özcan</strong> (SOC Lead)</div>
+      <div style="color: #38BDF8; font-weight: 700;">29.5ms SLA (< 500ms PASSED)</div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Aktif SSH Oturumları</div>
+      <div class="kpi-val">4 <span class="kpi-sub">3 Normal • 1 Şüpheli</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bugün Engellenen Tehdit (Oturum İptali)</div>
+      <div class="kpi-val">12 <span class="kpi-sub danger">SIGKILL (Ortalama 28.4ms)</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Güvenlik Duvarı Karantinası (IP)</div>
+      <div class="kpi-val">7 <span class="kpi-sub warn">iptables / ufw Aktif Blok</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Wazuh SIEM Güvenlik Olayları</div>
+      <div class="kpi-val">1,428 <span class="kpi-sub">Son 24 Saat • Rule 100200+</span></div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Active Sessions Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">🖥️ Gerçek Zamanlı İzlenen Aktif SSH Oturumları</div>
+        <span style="font-size: 11px; color: #38BDF8;">Otomatik Yenileme: Canlı (100ms)</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Oturum ID</th>
+            <th>Kullanıcı</th>
+            <th>Kaynak IP</th>
+            <th>Uçuş Süresi (Flight)</th>
+            <th>LSTM Risk Skoru</th>
+            <th>RL Savunma Kararı</th>
+            <th>Durum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: rgba(239, 68, 68, 0.08);">
+            <td><code>sess_ardaozcan_4660</code></td>
+            <td><strong>ardaozcan</strong> (SSH tty)</td>
+            <td>10.0.2.2:51240</td>
+            <td><strong>4,399 ms</strong> (Anormal)</td>
+            <td><strong style="color: #EF4444;">0.980 (%98 Risk)</strong></td>
+            <td><span class="badge kill">TERMINATE_SESSION</span></td>
+            <td><strong style="color: #EF4444;">Killed (SIGKILL)</strong></td>
+          </tr>
+          <tr>
+            <td><code>sess_sysadmin_ali_3202</code></td>
+            <td>sysadmin_ali</td>
+            <td>192.168.1.150</td>
+            <td>118 ms (Doğal)</td>
+            <td><span style="color: #10B981;">0.015 (%1.5 Risk)</span></td>
+            <td><span class="badge allow">ALLOW</span></td>
+            <td><span style="color: #10B981;">Güvenli</span></td>
+          </tr>
+          <tr>
+            <td><code>sess_dev_mehmet_1104</code></td>
+            <td>dev_mehmet</td>
+            <td>192.168.1.172</td>
+            <td>142 ms (Doğal)</td>
+            <td><span style="color: #10B981;">0.032 (%3.2 Risk)</span></td>
+            <td><span class="badge allow">ALLOW</span></td>
+            <td><span style="color: #10B981;">Güvenli</span></td>
+          </tr>
+          <tr style="background: rgba(245, 158, 11, 0.05);">
+            <td><code>sess_db_operator_8812</code></td>
+            <td>db_operator</td>
+            <td>10.0.2.15</td>
+            <td>620 ms (Duraklamalı)</td>
+            <td><span style="color: #F59E0B;">0.531 (%53 Risk)</span></td>
+            <td><span class="badge audit">AUDIT_INCREASE</span></td>
+            <td><span style="color: #F59E0B;">İzleniyor</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Mini Chart -->
+      <div style="margin-top: 14px; font-size: 12px; font-weight: 600; color: #94A3B8;">Saatlik Anomali Tespiti ve Otonom Müdahale Dağılımı</div>
+      <div class="chart-box">
+        <div class="bars">
+          <div class="bar-col"><div class="bar" style="height: 25px; background: #38BDF8;"></div><div class="bar-label">09:00</div></div>
+          <div class="bar-col"><div class="bar" style="height: 40px; background: #38BDF8;"></div><div class="bar-label">10:00</div></div>
+          <div class="bar-col"><div class="bar" style="height: 65px; background: #F59E0B;"></div><div class="bar-label">11:00</div></div>
+          <div class="bar-col"><div class="bar" style="height: 100px; background: #EF4444;"></div><div class="bar-label">12:00</div></div>
+          <div class="bar-col"><div class="bar" style="height: 50px; background: #38BDF8;"></div><div class="bar-label">13:00</div></div>
+          <div class="bar-col"><div class="bar" style="height: 85px; background: #EF4444;"></div><div class="bar-label">14:00</div></div>
+          <div class="bar-col"><div class="bar" style="height: 35px; background: #10B981;"></div><div class="bar-label">Şimdi</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Event Feed -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⚡ Otonom Olay Akışı</div>
+        <span style="font-size: 11px; color: #10B981;">Canlı SIEM Akışı</span>
+      </div>
+      <div class="feed-item" style="border-left: 3px solid #EF4444;">
+        <div class="feed-left">
+          <span>🚫</span>
+          <div>
+            <div style="font-weight: 700; color: #F8FAFC;">Oturum İptal Edildi (SIGKILL)</div>
+            <div style="font-size: 11px; color: #94A3B8;">user: ardaozcan (Risk: 0.980)</div>
+          </div>
+        </div>
+        <div style="color: #EF4444; font-weight: 600;">29.5ms</div>
+      </div>
+      <div class="feed-item" style="border-left: 3px solid #EF4444;">
+        <div class="feed-left">
+          <span>🔒</span>
+          <div>
+            <div style="font-weight: 700; color: #F8FAFC;">IP Karantinaya Alındı</div>
+            <div style="font-size: 11px; color: #94A3B8;">iptables DROP: 10.0.2.2</div>
+          </div>
+        </div>
+        <div style="color: #EF4444; font-weight: 600;">14ms</div>
+      </div>
+      <div class="feed-item" style="border-left: 3px solid #F59E0B;">
+        <div class="feed-left">
+          <span>👁️</span>
+          <div>
+            <div style="font-weight: 700; color: #F8FAFC;">Auditd Log Artırımı</div>
+            <div style="font-size: 11px; color: #94A3B8;">user: db_operator (Risk: 0.531)</div>
+          </div>
+        </div>
+        <div style="color: #F59E0B; font-weight: 600;">118ms</div>
+      </div>
+      <div class="feed-item" style="border-left: 3px solid #10B981;">
+        <div class="feed-left">
+          <span>✅</span>
+          <div>
+            <div style="font-weight: 700; color: #F8FAFC;">Meşru Kullanıcı Doğrulandı</div>
+            <div style="font-size: 11px; color: #94A3B8;">user: sysadmin_ali (Risk: 0.015)</div>
+          </div>
+        </div>
+        <div style="color: #10B981; font-weight: 600;">4.1ms</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sunucu Güvenliğinde İç Tehditlerin Biyometrik Analiz ile Tespiti ve Otonom Müdahale Mimarisi - Arayüz Dokümanı</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 14mm 16mm 14mm 16mm;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #1E293B;
+      background: #FFFFFF;
+      font-size: 10.5pt;
+      line-height: 1.5;
+    }
+
+    /* Page Break Rules */
+    .page {
+      page-break-after: always;
+      position: relative;
+      height: 268mm;
+      max-height: 268mm;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    /* Header styling identical to Delivery Doc 1 */
+    .doc-header {
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid #0284C7;
+    }
+    .doc-title {
+      font-size: 16.5pt;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .meta-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      row-gap: 5px;
+      font-size: 9.5pt;
+    }
+    .meta-label { font-weight: 700; color: #475569; }
+    .meta-value { color: #0F172A; }
+    .meta-value a { color: #0284C7; text-decoration: none; }
+
+    /* Section Typography */
+    h2 {
+      font-size: 12pt;
+      font-weight: 800;
+      color: #0F172A;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      border-left: 4px solid #0284C7;
+      padding-left: 8px;
+    }
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #1E293B;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+    p {
+      color: #334155;
+      margin-bottom: 8px;
+      text-align: justify;
+      font-size: 10pt;
+    }
+
+    /* UI Screenshot Box */
+    .screen-container {
+      margin: 8px 0 10px 0;
+      background: #0B0F19;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .screen-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .screen-caption {
+      background: #F1F5F9;
+      color: #475569;
+      font-size: 8.5pt;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-top: 1px solid #E2E8F0;
+      text-align: left;
+    }
+
+    /* Description list */
+    ul {
+      margin-left: 18px;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 9.5pt;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Info Badge */
+    .badge {
+      display: inline-block;
+      background: #E0F2FE;
+      color: #0369A1;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid #CBD5E1;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: #64748B;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= PAGE 1: COVER & OVERVIEW ================= -->
+  <div class="page">
+    <div class="doc-header">
+      <div class="doc-title">Sunucu Güvenliğinde İç Tehditlerin Biyometrik Analiz ile Tespiti ve Otonom Müdahale Mimarisi</div>
+      <div style="font-size: 11pt; color: #0284C7; font-weight: 700;">2. Teslim Dokümanı: Sistem Arayüz Tasarımları ve İşlevsel Açıklamaları</div>
+    </div>
+
+    <div class="meta-box">
+      <div class="meta-label">Proje Ekibi:</div>
+      <div class="meta-value"><strong>Selçuk Arda Özcan</strong></div>
+
+      <div class="meta-label">Proje Danışmanı:</div>
+      <div class="meta-value">ismail.parlak@ibu.edu.tr</div>
+
+      <div class="meta-label">GitHub Adresi:</div>
+      <div class="meta-value"><a href="https://github.com/selcukardaozcan/Insider_Deneme">github.com/selcukardaozcan/Insider_Deneme</a></div>
+
+      <div class="meta-label">Lisans Tipi:</div>
+      <div class="meta-value">Açık Kaynak (MIT Lisansı)</div>
+
+      <div class="meta-label">Teslim Tarihi:</div>
+      <div class="meta-value">26 Kasım 2026</div>
+    </div>
+
+    <h2>1. Arayüz Tasarımı ve Kullanıcı Deneyimi (UX) Mimarisi</h2>
+    <p>
+      Geliştirilen Otonom Siber Savunma Sistemi, temel prensip olarak insan müdahalesine ihtiyaç duymadan milisaniye seviyesinde (&lt; 500 ms SLA) 
+      karar verip oturum sonlandırma ve IP karantinası uygulayabilen bir uç nokta savunma mimarisidir. Ancak siber güvenlik operasyon merkezlerinde (SOC) 
+      görev yapan analistlerin ve sistem yöneticilerinin; gerçekleşen iç tehdit sızmalarını, yapay zekanın ürettiği anomali skorlarını, tuş dinamiği telemetrisini 
+      ve güvenlik duvarı müdahalelerini merkezi bir konsoldan izleyebilmeleri ve politika eşiklerini yönetebilmeleri amacıyla <strong>SENTINEL-AI SOC Komuta Arayüzü</strong> tasarlanmıştır.
+    </p>
+
+    <p>
+      Arayüz tasarımı, siber güvenlik endüstrisi standartları (Splunk, CrowdStrike, Wazuh Dashboard) göz önünde bulundurularak 
+      <strong>koyu tema (Dark Mode)</strong> odaklı, yüksek bilgi yoğunluğuna sahip, düşük göz yorgunluğu sağlayan modern bir mimaride kurgulanmıştır.
+    </p>
+
+    <h2>2. Arayüz Ekran Listesi ve İşlevsel Haritası</h2>
+    <ul>
+      <li><strong>Ekran 1: Güvenli Analist Girişi ve Kimlik Doğrulama Ekranı</strong> (Rol tabanlı erişim, FIDO2 / Donanım Anahtarı 2FA desteği).</li>
+      <li><strong>Ekran 2: SOC Komuta Merkezi ve Genel Tehdit İzleme Paneli</strong> (Aktif SSH oturumları, anlık risk skorları, saatlik anomali dağılımı ve SLA göstergeleri).</li>
+      <li><strong>Ekran 3: Canlı SSH Oturumu ve Biyometrik Tuş Dinamiği İzleme Ekranı</strong> (Milisaniye hassas uçuş süresi dalga grafiği, LSTM risk göstergesi ve ham C kancası telemetrisi).</li>
+      <li><strong>Ekran 4: Otonom Savunma ve Güvenlik Duvarı İzolasyon Konsolu</strong> (Kademeli savunma merdiveni, iptables karantina listesi ve anlık oturum öldürme geçmişi).</li>
+      <li><strong>Ekran 5: Wazuh SIEM Olay ve Alarm İnceleme Ekranı</strong> (Özel kural kümesi 100200-100203 eşleşmeleri, MITRE ATT&CK T1078 çerçevesi ve ham JSON olay yükü).</li>
+      <li><strong>Ekran 6: Yapay Zeka Savunma Politikası ve Eşik Değeri Yapılandırma Ekranı</strong> (İnsan düşünme molası toleransı, PPO karar serisi şartı ve systemd CPU kota denetimi).</li>
+    </ul>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 1 / 7</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 2: SCREEN 1 (LOGIN) ================= -->
+  <div class="page">
+    <h2>Ekran 1: Güvenli Analist Giriş ve Kimlik Doğrulama Ekranı</h2>
+    <p>
+      SOC analistlerinin ve güvenlik mühendislerinin komuta konsoluna güvenli erişim sağladığı başlangıç ekranıdır.
+      Yönetim konsolunun kendisinin bir siber saldırı vektörü olmaması amacıyla çok faktörlü kimlik doğrulama ile sıkılaştırılmıştır.
+    </p>
+
+    <div class="screen-container">
+      <img class="screen-img" src="ui_screens/screen1.png" alt="Ekran 1: Analist Girişi">
+      <div class="screen-caption">Şekil 1: Güvenli Analist Kimlik Doğrulama Ekranı (Rol Seçimi ve FIDO2/YubiKey Entegrasyonu)</div>
+    </div>
+
+    <h3>İşlevsel Bileşenler ve Açıklamalar:</h3>
+    <ul>
+      <li><span class="badge">Rol Tabanlı Erişim Kontrolü (RBAC):</span> <strong>SOC Analisti</strong> (yalnızca izleme ve log inceleme) ve <strong>Güvenlik Mühendisi</strong> (politika değiştirme, kural gevşetme ve manuel IP unban yetkisi) rolleri arasında ayrım yapılır.</li>
+      <li><span class="badge">Donanım Anahtarı / FIDO2 Desteği:</span> Klasik parola sızıntılarını engellemek adına WebAuthn standardında YubiKey donanım anahtarı doğrulaması zorunlu tutulur.</li>
+      <li><span class="badge">Şifrelenmiş İletişim:</span> Web arayüzü ile savunma daemon servisi arasındaki tüm veri transferi 256-bit TLS şifreli WebSocket ve REST API kanalları üzerinden yürütülür.</li>
+    </ul>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 2 / 7</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 3: SCREEN 2 (DASHBOARD) ================= -->
+  <div class="page">
+    <h2>Ekran 2: SOC Komuta Merkezi & Genel Tehdit İzleme Paneli</h2>
+    <p>
+      Sunucu altyapısına bağlı tüm aktif SSH oturumlarının genel sağlık, risk ve müdahale istatistiklerinin tek bir ekranda özetlendiği ana gösterge panelidir (Executive Dashboard).
+    </p>
+
+    <div class="screen-container">
+      <img class="screen-img" src="ui_screens/screen2.png" alt="Ekran 2: SOC Dashboard">
+      <div class="screen-caption">Şekil 2: Merkezi Güvenlik Paneli (KPI Metrikleri, Canlı SSH Tablosu ve Anomali Dağılım Grafiği)</div>
+    </div>
+
+    <h3>İşlevsel Bileşenler ve Açıklamalar:</h3>
+    <ul>
+      <li><span class="badge">Üst KPI Kartları:</span> Anlık aktif SSH oturum sayısı (örn. 3 normal, 1 şüpheli), gün içinde otonom sonlandırılan oturum sayısı (12 adet SIGKILL), güvenlik duvarında karantinaya alınan IP sayısı (7 adet) ve Wazuh'a gönderilen son 24 saatlik olay sayısı (1,428 adet) dinamik olarak güncellenir.</li>
+      <li><span class="badge">SLA & Gecikme Sayacı:</span> Sistemin fonksiyonel olmayan gereksinimi olan <em>"&lt; 500 ms müdahale gecikmesi"</em> kuralının sağlanıp sağlanmadığı anlık olarak ölçülür (Şekilde <strong>29.5 ms</strong> ile SLA başarıyla geçilmiş görünmektedir).</li>
+      <li><span class="badge">Aktif SSH Oturumları Tablosu:</span> Kullanıcı adı, oturum tty ID'si, kaynak IP adresi, ortalama uçuş süresi, PyTorch anomali puanı ve RL eylemi gerçek zamanlı olarak listelenir. Anomali tespit edilen oturum kırmızı arka planla analistin dikkatine sunulur.</li>
+      <li><span class="badge">Canlı Olay Akışı (Event Feed):</span> Sağ panelde, otonom savunma motorunun milisaniyeler içerisinde gerçekleştirdiği IP karantinası ve oturum kesme eylemleri kronolojik akışla gösterilir.</li>
+    </ul>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 3 / 7</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 4: SCREEN 3 (KEYSTROKE MONITOR) ================= -->
+  <div class="page">
+    <h2>Ekran 3: Canlı SSH Oturumu ve Biyometrik Tuş Dinamiği İzleme Ekranı</h2>
+    <p>
+      Şüpheli bir oturum seçildiğinde analistin derinlemesine inceleme yapmasını sağlayan ekrandır.
+      C sensöründen toplanan milisaniyelik ham zaman damgaları ve PyTorch LSTM derin öğrenme modelinin karar süreci görselleştirilir.
+    </p>
+
+    <div class="screen-container">
+      <img class="screen-img" src="ui_screens/screen3.png" alt="Ekran 3: Tuş Dinamiği İzleme">
+      <div class="screen-caption">Şekil 3: Canlı Biyometrik Tuş Dinamiği ve LSTM Risk Skoru İnceleme Ekranı</div>
+    </div>
+
+    <h3>İşlevsel Bileşenler ve Açıklamalar:</h3>
+    <ul>
+      <li><span class="badge">LSTM Risk Göstergesi:</span> PyTorch 2-katmanlı LSTM modelinin son sigmoid katmanından çıkan anomali risk puanını (0.000 ile 1.000 arasında) gösterir. Şekilde görülen <strong>0.980 (%98 risk)</strong> değeri, çalınmış kimlik bilgisini doğrulamaktadır.</li>
+      <li><span class="badge">Uçuş Süresi (Flight Time) Dalga Grafiği:</span> Kullanıcının iki tuş arasındaki geçiş gecikmelerini zaman serisi olarak çizer. Yeşil kesikli çizgi meşru kullanıcının normal profilini (~120ms) temsil ederken, kırmızı çizgi saldırganın 9,564 ms'lik tereddüt anomalisi zirvesini net bir şekilde görselleştirir.</li>
+      <li><span class="badge">Ham Telemetri Akışı:</span> Linux soketinden (<code>/var/run/insider_sensor.sock</code>) gelen basılan karakter, flight time, dwell time ve yazma hızı değerleri satır satır denetlenir. 8. tuşta sistemin oturumu <code>SIGKILL</code> ile nasıl kapattığı kayıt altına alınmıştır.</li>
+    </ul>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 4 / 7</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 5: SCREEN 4 (MITIGATION CONSOLE) ================= -->
+  <div class="page">
+    <h2>Ekran 4: Otonom Savunma ve Güvenlik Duvarı İzolasyon Konsolu</h2>
+    <p>
+      Pekiştirmeli Öğrenme (RL - PPO) ajanının aldığı kademeli kararların, Linux çekirdeğindeki eyleyiciler (iptables ve pkill) aracılığıyla nasıl icra edildiğini gösteren operasyonel yönetim ekranıdır.
+    </p>
+
+    <div class="screen-container">
+      <img class="screen-img" src="ui_screens/screen4.png" alt="Ekran 4: Savunma ve Güvenlik Duvarı">
+      <div class="screen-caption">Şekil 4: Otonom Savunma Merdiveni ve iptables Karantina Yönetim Konsolu</div>
+    </div>
+
+    <h3>İşlevsel Bileşenler ve Açıklamalar:</h3>
+    <ul>
+      <li><span class="badge">Kademeli Savunma Merdiveni (Escalation Stepper):</span> Sistemin savunma politikası 5 aşamalı bir durum makinesidir:
+        <br><strong>0-ALLOW:</strong> Sıfır müdahale, meşru akış.
+        <br><strong>1-AUDIT_INCREASE:</strong> Şüphe başlangıcında auditd denetim seviyesini artırma.
+        <br><strong>2-RATE_LIMIT:</strong> TTY oturumuna gecikme ekleme.
+        <br><strong>3-TERMINATE_SESSION:</strong> Sürekli anomalide oturumu SIGKILL ile sonlandırma.
+        <br><strong>4-ISOLATE_IP:</strong> Saldırgan IP'yi güvenlik duvarında tamamen karantinaya alma.
+      </li>
+      <li><span class="badge">iptables Karantina Tablosu:</span> Bloklanan IP adresleri (örn. <code>10.0.2.2</code>), hedef port ve kalan karantina süresi (varsayılan 60 dk) listelenir. Analist gerektiğinde tek tıkla <em>"Engeli Kaldır (Unban)"</em> işlemi yapabilir.</li>
+      <li><span class="badge">Müdahale Geçmişi ve SLA Teyidi:</span> Her otonom eylemin karar ve infaz süresi milisaniye cinsinden kaydedilir (ortalama 29.54 ms müdahale süresi).</li>
+    </ul>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 5 / 7</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 6: SCREEN 5 (WAZUH SIEM) ================= -->
+  <div class="page">
+    <h2>Ekran 5: Wazuh SIEM Olay ve Alarm İnceleme Ekranı</h2>
+    <p>
+      Otonom sistemin aldığı tüm kararların merkezi Wazuh SIEM platformuna uyumlu formatta aktarıldığı, adli bilişim (forensic) incelemelerine olanak tanıyan detaylı log ekranıdır.
+    </p>
+
+    <div class="screen-container">
+      <img class="screen-img" src="ui_screens/screen5.png" alt="Ekran 5: Wazuh SIEM">
+      <div class="screen-caption">Şekil 5: Wazuh Özel Kuralları (100200-100203) ve JSON Güvenlik Olayı İnceleme Ekranı</div>
+    </div>
+
+    <h3>İşlevsel Bileşenler ve Açıklamalar:</h3>
+    <ul>
+      <li><span class="badge">Wazuh Özel Kural Kümesi:</span> Projede geliştirilen XML kuralları gösterilir:
+        <br>• <strong>Kural 100200 (Level 2):</strong> Normal Biyometrik Doğrulama (ALLOW).
+        <br>• <strong>Kural 100201 (Level 4):</strong> Orta Düzey Dalgalanma (RATE_LIMIT).
+        <br>• <strong>Kural 100202 (Level 8):</strong> Yüksek Tuş Anomalisi (AUDIT_INCREASE).
+        <br>• <strong>Kural 100203 (Level 12 - Kritik):</strong> İç Tehdit Doğrulandı ve Oturum Kesildi (TERMINATE_SESSION / ISOLATE_IP).
+      </li>
+      <li><span class="badge">MITRE ATT&CK Çerçevesi Eşleşmesi:</span> Saldırı, siber güvenlik literatüründeki <strong>T1078 (Valid Accounts - Çalınmış Geçerli Hesaplar)</strong> tekniği ve <strong>TA0001 (İlk Erişim)</strong> taktiği ile doğrudan ilişkilendirilir.</li>
+      <li><span class="badge">Ham JSON Olay Yükü:</span> SIEM yöneticilerinin SIEM paneline aktarılan ham telemetriyi (kullanıcı, oturum ID, risk skoru, eyleyici gecikmesi ve firewall kararı) JSON formatında eksiksiz inceleyebilmesini sağlar.</li>
+    </ul>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 6 / 7</span>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 7: SCREEN 6 & CONCLUSION ================= -->
+  <div class="page">
+    <h2>Ekran 6: Yapay Zeka Savunma Politikası ve Eşik Değeri Yapılandırma Ekranı</h2>
+    <p>
+      Sistem yöneticisinin ve güvenlik mühendisinin makine öğrenmesi modellerini, insan düşünme toleransını ve kaynak sınırlarını canlı olarak yapılandırdığı yönetim ekranıdır.
+    </p>
+
+    <div class="screen-container">
+      <img class="screen-img" src="ui_screens/screen6.png" alt="Ekran 6: Politika ve Ayarlar">
+      <div class="screen-caption">Şekil 6: Yapay Zeka Savunma Politikası ve Eşik Değeri Yapılandırma Ekranı</div>
+    </div>
+
+    <h3>İşlevsel Bileşenler ve Açıklamalar:</h3>
+    <ul>
+      <li><span class="badge">İnsan Düşünme Molası Toleransı (Thinking Pause Cap):</span> Kullanıcıların okuma veya düşünme esnasındaki duraklamalarını (örn. 2,000 ms) normal karşılayacak tavan eşik ayarlanır. Bu sayede meşru kullanıcıların mağduriyeti (False Positive) engellenir.</li>
+      <li><span class="badge">Asgari Tetikleme Penceresi (Window Size):</span> İlk risk analizi için gerekli tuş vuruşu sayısı (8 tuş) belirlenir.</li>
+      <li><span class="badge">PPO Karar Serisi Şartı (Streak Threshold):</span> Oturum kapatma kararı için en az kaç ardışık anomali gerektiği (örn. 3 ardışık tuş) ayarlanır.</li>
+      <li><span class="badge">Linux systemd CPU Kotası:</span> Non-functional requirement olarak belirlenen <code>CPUQuota=5%</code> kısıtının donanımsal olarak devrede olduğu denetlenir.</li>
+    </ul>
+
+    <h2>3. Sonuç ve Genel Değerlendirme</h2>
+    <p>
+      Sunulan arayüz tasarımları; projenin teknik çekirdeğini oluşturan C sensör modülü, PyTorch LSTM zaman serisi derin öğrenme ağı, 
+      Stable-Baselines3 Pekiştirmeli Öğrenme karar motoru ve Linux çekirdek müdahale mekanizmalarını (iptables, pkill) 
+      SOC analistlerinin en yüksek verimlilikle yönetebileceği endüstriyel bir kullanıcı deneyimine (UX) kavuşturmuştur.
+    </p>
+
+    <div class="doc-footer">
+      <span>Bitirme Projesi 2. Teslim Dokümanı: Sistem Arayüz Tasarımları</span>
+      <span>Sayfa 7 / 7</span>
+    </div>
+  </div>
+
+</body>
+</html>

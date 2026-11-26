@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Screen 5 - Wazuh SIEM Event Explorer & Deep Inspection</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0B0F19; color: #E2E8F0; width: 1400px; height: 800px; padding: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
+    .header { display: flex; align-items: center; justify-content: space-between; background: #111827; border: 1px solid #1F2937; padding: 12px 20px; border-radius: 12px; }
+    .header-title h2 { font-size: 15px; font-weight: 700; color: #F8FAFC; }
+    .header-title span { font-size: 12px; color: #94A3B8; }
+    
+    .grid-2col { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; flex: 1; min-height: 0; }
+    .panel { background: #111827; border: 1px solid #1F2937; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+    .panel-title { font-size: 13px; font-weight: 700; color: #F8FAFC; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+
+    /* Wazuh Rule badges */
+    .rule-pill { background: #0284C7; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; font-family: monospace; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { color: #64748B; font-weight: 600; padding: 8px 6px; border-bottom: 1px solid #1F2937; text-transform: uppercase; font-size: 10px; }
+    td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #CBD5E1; font-size: 11px; }
+
+    /* JSON Viewer */
+    .json-box { flex: 1; background: #0A0E17; border: 1px solid #1E293B; border-radius: 8px; padding: 14px; font-family: "Fira Code", Consolas, monospace; font-size: 11.5px; color: #E2E8F0; overflow-y: auto; line-height: 1.5; }
+    .json-key { color: #38BDF8; }
+    .json-val-str { color: #34D399; }
+    .json-val-num { color: #F59E0B; }
+    .json-val-bool { color: #EC4899; }
+
+    /* MITRE Card */
+    .mitre-card { background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.25); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 11.5px; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <h2>Wazuh SIEM Olay ve Alarm İnceleme Ekranı</h2>
+      <span>Merkezi Güvenlik İzleme • Custom Rule Set 100200-100203 • auditd & Syscall Korelasyonu</span>
+    </div>
+    <div style="display: flex; gap: 8px; font-size: 12px;">
+      <span style="color: #94A3B8;">Log Dosyası:</span>
+      <code style="color: #38BDF8;">/var/log/insider_defense/alerts.json</code>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <!-- Left: Wazuh Alerts Table -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>🚨 Tetiklenen Wazuh Kuralları ve Güvenlik Alarmları</span>
+        <span style="font-size: 11px; color: #38BDF8;">Özel Dekoder: insider-defense-decoder</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Kural ID</th>
+            <th>Seviye</th>
+            <th>Kural Tanımı</th>
+            <th>Hedef Kullanıcı</th>
+            <th>Aksiyon</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: rgba(239, 68, 68, 0.08);">
+            <td><span class="rule-pill" style="background: #DC2626;">100203</span></td>
+            <td><strong style="color: #EF4444;">12 (Kritik)</strong></td>
+            <td>İç Tehdit Doğrulandı: Oturum İptal & IP İzole</td>
+            <td>ardaozcan</td>
+            <td><strong style="color: #EF4444;">TERMINATE</strong></td>
+          </tr>
+          <tr>
+            <td><span class="rule-pill" style="background: #D97706;">100202</span></td>
+            <td><strong style="color: #F59E0B;">8 (Uyarı)</strong></td>
+            <td>Yüksek Tuş Anomalisi: Auditd Sıklığı Artırıldı</td>
+            <td>ardaozcan</td>
+            <td><span style="color: #F59E0B;">AUDIT_UP</span></td>
+          </tr>
+          <tr>
+            <td><span class="rule-pill" style="background: #2563EB;">100201</span></td>
+            <td><strong style="color: #38BDF8;">4 (Bilgi)</strong></td>
+            <td>Orta Seviye Ritim Dalgalanması Algılandı</td>
+            <td>db_operator</td>
+            <td><span>RATE_LIMIT</span></td>
+          </tr>
+          <tr>
+            <td><span class="rule-pill" style="background: #059669;">100200</span></td>
+            <td><strong style="color: #10B981;">2 (Normal)</strong></td>
+            <td>SSH Oturumu Açıldı & Biyometrik Doğrulandı</td>
+            <td>sysadmin_ali</td>
+            <td><span style="color: #10B981;">ALLOW</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- MITRE ATT&CK Mapping Card -->
+      <div class="mitre-card">
+        <strong style="color: #38BDF8;">🛡️ MITRE ATT&CK Güvenlik Çerçevesi Eşleşmesi:</strong>
+        <div style="margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>• <strong>Taktik:</strong> İlk Erişim (TA0001) / Savunmayı Aşma</div>
+          <div>• <strong>Teknik:</strong> T1078 (Valid Accounts - Çalınmış Kimlik)</div>
+          <div>• <strong>Tespit:</strong> Keystroke Dynamics Biometrics</div>
+          <div>• <strong>Müdahale:</strong> Otonom Session Drop (T1078.004)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Raw JSON Event Viewer -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>📄 Ham Olay JSON Yükü (Wazuh SIEM Ingestion)</span>
+        <span style="font-size: 11px; color: #10B981;">Format: Wazuh-Compatible JSON</span>
+      </div>
+
+      <div class="json-box">
+{
+  <span class="json-key">"timestamp"</span>: <span class="json-val-str">"2026-11-06T15:00:12.842+03:00"</span>,
+  <span class="json-key">"rule_id"</span>: <span class="json-val-num">100203</span>,
+  <span class="json-key">"event_type"</span>: <span class="json-val-str">"keystroke_anomaly_mitigation"</span>,
+  <span class="json-key">"session_id"</span>: <span class="json-val-str">"sess_ardaozcan_4660"</span>,
+  <span class="json-key">"user"</span>: <span class="json-val-str">"ardaozcan"</span>,
+  <span class="json-key">"source_ip"</span>: <span class="json-val-str">"10.0.2.2"</span>,
+  <span class="json-key">"risk_metrics"</span>: {
+    <span class="json-key">"lstm_risk_score"</span>: <span class="json-val-num">0.9804</span>,
+    <span class="json-key">"ema_risk"</span>: <span class="json-val-num">0.9804</span>,
+    <span class="json-key">"anomaly_streak"</span>: <span class="json-val-num">3</span>,
+    <span class="json-key">"max_flight_time_ms"</span>: <span class="json-val-num">9564.0</span>
+  },
+  <span class="json-key">"autonomous_action"</span>: {
+    <span class="json-key">"policy"</span>: <span class="json-val-str">"TERMINATE_SESSION"</span>,
+    <span class="json-key">"enforcement_method"</span>: <span class="json-val-str">"pkill -9 SIGKILL"</span>,
+    <span class="json-key">"target_pid"</span>: <span class="json-val-num">4660</span>,
+    <span class="json-key">"latency_ms"</span>: <span class="json-val-num">29.54</span>,
+    <span class="json-key">"sla_status"</span>: <span class="json-val-str">"PASSED_UNDER_500MS"</span>
+  },
+  <span class="json-key">"firewall"</span>: {
+    <span class="json-key">"action"</span>: <span class="json-val-str">"ISOLATE_IP"</span>,
+    <span class="json-key">"chain"</span>: <span class="json-val-str">"INSIDER_DEFENSE"</span>,
+    <span class="json-key">"duration_minutes"</span>: <span class="json-val-num">60</span>
+  }
+}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

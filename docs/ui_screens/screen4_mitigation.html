@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Screen 4 - Autonomous Mitigation & Firewall Isolation Console</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0B0F19; color: #E2E8F0; width: 1400px; height: 800px; padding: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
+    .header { display: flex; align-items: center; justify-content: space-between; background: #111827; border: 1px solid #1F2937; padding: 12px 20px; border-radius: 12px; }
+    .header-title h2 { font-size: 15px; font-weight: 700; color: #F8FAFC; }
+    .header-title span { font-size: 12px; color: #94A3B8; }
+    
+    /* Escalation Ladder Stepper */
+    .stepper { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .step { background: #111827; border: 1px solid #1F2937; border-radius: 10px; padding: 14px; position: relative; }
+    .step.active { border-color: #38BDF8; background: rgba(56, 189, 248, 0.05); }
+    .step.triggered { border-color: #EF4444; background: rgba(239, 68, 68, 0.08); }
+    .step-num { font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 4px; }
+    .step-title { font-size: 13px; font-weight: 700; color: #F8FAFC; margin-bottom: 4px; }
+    .step-desc { font-size: 11px; color: #94A3B8; line-height: 1.4; }
+    
+    .grid-2col { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 16px; flex: 1; min-height: 0; }
+    .panel { background: #111827; border: 1px solid #1F2937; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; overflow: hidden; }
+    .panel-title { font-size: 13px; font-weight: 700; color: #F8FAFC; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { color: #64748B; font-weight: 600; padding: 8px 6px; border-bottom: 1px solid #1F2937; text-transform: uppercase; font-size: 10px; }
+    td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #CBD5E1; font-size: 11px; }
+    .btn-action { background: #1E293B; border: 1px solid #334155; color: #94A3B8; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; font-weight: 600; }
+    .btn-action:hover { color: #F8FAFC; border-color: #64748B; }
+
+    .code-box { background: #0F172A; border: 1px solid #1E293B; border-radius: 6px; padding: 10px; font-family: monospace; font-size: 11px; color: #38BDF8; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <h2>Otonom Savunma ve Güvenlik Duvarı İzolasyon Konsolu</h2>
+      <span>Kademeli Savunma Merdiveni • iptables & ufw Eyleyicileri • SSH tty Karantinası</span>
+    </div>
+    <div style="font-size: 12px; color: #10B981; font-weight: 600;">
+      ⚡ Aktif Eyleyici Zinciri: <code>INSIDER_DEFENSE (iptables)</code>
+    </div>
+  </div>
+
+  <!-- Escalation Ladder -->
+  <div class="stepper">
+    <div class="step">
+      <div class="step-num">Aşama 0 (Risk &lt; 0.45)</div>
+      <div class="step-title">ALLOW</div>
+      <div class="step-desc">Normal oturum akışı. Sıfır kullanıcı kesintisi, arka plan pasif dinleme.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">Aşama 1 (Risk &gt; 0.48)</div>
+      <div class="step-title">AUDIT_INCREASE</div>
+      <div class="step-desc">Denetim sıklığı artırımı. auditd detaylı komut ve syscall izlemesine geçer.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">Aşama 2 (Risk &gt; 0.65)</div>
+      <div class="step-title">RATE_LIMIT</div>
+      <div class="step-desc">Terminal hız kısıtlama. TTY seviyesinde 300ms gecikme eklenir.</div>
+    </div>
+    <div class="step triggered">
+      <div class="step-num">Aşama 3 (Risk &gt; 0.75)</div>
+      <div class="step-title" style="color: #EF4444;">TERMINATE_SESSION</div>
+      <div class="step-desc" style="color: #F8FAFC;">Oturum Anında Sonlandırma! pkill -9 ve SIGKILL ile tty bağlantısı kesilir.</div>
+    </div>
+    <div class="step triggered">
+      <div class="step-num">Aşama 4 (Risk &gt; 0.88)</div>
+      <div class="step-title" style="color: #EF4444;">ISOLATE_IP</div>
+      <div class="step-desc" style="color: #F8FAFC;">Kaynak IP İzolasyonu. iptables DROP zincirine eklenir (Karantina: 60 dk).</div>
+    </div>
+  </div>
+
+  <!-- Grid Area -->
+  <div class="grid-2col">
+    <!-- Active iptables Jail Table -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>🛡️ iptables Güvenlik Duvarı Karantina Listesi</span>
+        <button class="btn-action">+ Manuel IP Ekle</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Bloke Edilen IP</th>
+            <th>Hedef Port</th>
+            <th>Süre</th>
+            <th>Tetikleyen Neden</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: rgba(239, 68, 68, 0.08);">
+            <td><strong style="color: #EF4444;">10.0.2.2</strong></td>
+            <td>22 (SSH)</td>
+            <td>58 dk kaldı</td>
+            <td>Risk 0.980 (Stolen Creds)</td>
+            <td><button class="btn-action">Engeli Kaldır (Unban)</button></td>
+          </tr>
+          <tr>
+            <td><strong>203.0.113.42</strong></td>
+            <td>22 (SSH)</td>
+            <td>14 dk kaldı</td>
+            <td>Simülasyon Saldırganı</td>
+            <td><button class="btn-action">Engeli Kaldır</button></td>
+          </tr>
+          <tr>
+            <td><strong>198.51.100.19</strong></td>
+            <td>Tüm Portlar</td>
+            <td>32 dk kaldı</td>
+            <td>Brute-Force & Biyometrik</td>
+            <td><button class="btn-action">Engeli Kaldır</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="code-box">
+        # Linux Çekirdek Kuralı:<br>
+        iptables -I INSIDER_DEFENSE -s 10.0.2.2 -p tcp --dport 22 -j DROP
+      </div>
+    </div>
+
+    <!-- Mitigation Logs & Session Termination History -->
+    <div class="panel">
+      <div class="panel-title">
+        <span>📜 Gerçekleşen Otonom Müdahale Geçmişi</span>
+        <span style="font-size: 11px; color: #94A3B8;">Ortalama Karar Gecikmesi: <strong>29.54 ms</strong></span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Zaman</th>
+            <th>Oturum ID</th>
+            <th>Kullanıcı</th>
+            <th>Risk</th>
+            <th>Alınan Aksiyon</th>
+            <th>Müdahale Gecikmesi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>15:00:12</td>
+            <td><code>sess_ardaozcan_4660</code></td>
+            <td>ardaozcan</td>
+            <td><span style="color: #EF4444; font-weight: 700;">0.980</span></td>
+            <td><strong style="color: #EF4444;">TERMINATE_SESSION</strong></td>
+            <td><strong>29.54 ms</strong> (<span style="color: #10B981;">&lt;500ms</span>)</td>
+          </tr>
+          <tr>
+            <td>15:00:12</td>
+            <td><code>sess_ardaozcan_4660</code></td>
+            <td>ardaozcan</td>
+            <td><span style="color: #EF4444; font-weight: 700;">0.980</span></td>
+            <td><strong style="color: #EF4444;">ISOLATE_IP (10.0.2.2)</strong></td>
+            <td><strong>14.20 ms</strong></td>
+          </tr>
+          <tr>
+            <td>14:38:04</td>
+            <td><code>sess_sysadmin_ali_3202</code></td>
+            <td>sysadmin_ali</td>
+            <td><span style="color: #10B981; font-weight: 700;">0.015</span></td>
+            <td><span style="color: #10B981;">ALLOW (Doğrulandı)</span></td>
+            <td><strong>2.50 ms</strong></td>
+          </tr>
+          <tr>
+            <td>12:13:42</td>
+            <td><code>sess_ardaozcan_4206</code></td>
+            <td>ardaozcan</td>
+            <td><span style="color: #F59E0B; font-weight: 700;">0.531</span></td>
+            <td><span style="color: #F59E0B;">AUDIT_INCREASE</span></td>
+            <td><strong>118.06 ms</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #94A3B8; padding-top: 10px; border-top: 1px solid #1F2937;">
+        <span>İnsan Müdahalesi Gereksinimi: <strong>%0 (Tamamen Otonom)</strong></span>
+        <span>Sistem CPU Yükü: <strong>%1.2 (Hedef &lt;%5 Kota)</strong></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
